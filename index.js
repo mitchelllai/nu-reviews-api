@@ -48,6 +48,10 @@ async function getWebDev(){
     
 }
 
+app.get('/', function(req, res){
+    res.status(200).send('App is running. Try GET /count or GET /webdev')
+})
+
 app.get('/count', function(req, res){
     getCounts().then(
         counts => {
