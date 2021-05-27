@@ -68,6 +68,8 @@ app.get('/webdev', function(req,res){
     )
 })
 
-app.listen(8080)
-console.log('Application listening on PORT: 8080')
-console.log('http://localhost:8080')
+PORT = process.env.PORT || 8080
+
+app.listen(PORT)
+console.log(`Application listening on PORT: ${PORT}`)
+console.log(`http://localhost:${PORT}`)
