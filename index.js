@@ -17,9 +17,11 @@ DB_OPTIONS = {
 app.use((_req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
     res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE");
     next();
 })
+app.use(express.json())
 
 // mongoose.connect(DB_URL, DB_OPTIONS, 
 //     err => {
@@ -140,6 +142,49 @@ app.get('/courses', function(req, res){
         matches => {
             // console.log(matches)
             res.status(200).send(matches)
+        }
+    )
+})
+
+async function postReview(aReview){
+    const mongoClient = new MongoClient(DB_URL, DB_OPTIONS)
+    await mongoClient.connect();
+    const reviews = await mongoClient.db('nu-reviews').collection('reviews');
+    // review = {
+    //     course_id: 'specific course_id',
+    //     user_id: 'specific user_id',
+    //     lectures: 4.5,
+    //     difficulty: 4.5,
+    //     assignments: 4.5,
+    //     time: 9.8,
+    //     text: 'this class is booty cheeks.'
+    // }
+    await reviews.insertOne(aReview)
+    await mongoClient.close()
+    return aReview
+}
+app.post('/review', function(req, res){
+    // console.log(req.body)
+    postReview(req.body).then(
+        review => {
+            res.status(200).send(review)
+        }
+    )
+})
+
+async function getReviews(course_id){
+    const mongoClient = new MongoClient(DB_URL, DB_OPTIONS)
+    await mongoClient.connect();
+    const reviews = await mongoClient.db('nu-reviews').collection('reviews');
+    const matches = await reviews.find({course_id: course_id}).sort({'_id':-1}).toArray();
+    await mongoClient.close();
+    return matches;
+}
+app.get('/review', function(req, res){
+    const course_id = req.query.course_id
+    getReviews(course_id).then(
+        courses => {
+            res.status(200).send(courses)
         }
     )
 })
